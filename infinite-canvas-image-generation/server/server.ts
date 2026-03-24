@@ -215,15 +215,20 @@ app.post("/sketch-to-image-variations", async (req, res) => {
 
 app.post("/generate-dog", async (req, res) => {
   try {
-    // Navigate up from server/dist/server.js or server/server.ts
-    // __dirname is .../server
-    const scriptPath = path.resolve(__dirname, "../../../inference.py");
-    const cwd = path.resolve(__dirname, "../../../");
-
+    const { numImages = 1, classId } = req.body;
+    
+    const scriptPath = path.resolve(process.cwd(), "../../inference.py");
+    const cwd = path.resolve(process.cwd(), "../../");
     const pythonPath = path.resolve(cwd, "venv/Scripts/python.exe");
-    console.log("Generating dog with script:", scriptPath, "using python:", pythonPath);
 
-    exec(`"${pythonPath}" "${scriptPath}"`, { cwd }, (error, stdout, stderr) => {
+    let command = `"${pythonPath}" "${scriptPath}" --num_images ${numImages}`;
+    if (classId !== undefined && classId !== null) {
+      command += ` --class_id ${classId}`;
+    }
+
+    console.log("Executing command:", command);
+
+    exec(command, { cwd }, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         console.error(`stderr: ${stderr}`);
@@ -231,20 +236,19 @@ app.post("/generate-dog", async (req, res) => {
       }
       
       try {
-        const lines = stdout.trim().split("\n");
-        // Find the line with data:image
-        const dataUri = lines.find(line => line.startsWith("data:image"));
-        
-        if (dataUri) {
-          // Return as if it were a list of variations
-          res.json({ variations: [dataUri] });
+        const result = JSON.parse(stdout.trim());
+        if (result.variations && result.variations.length > 0) {
+          res.json({ 
+            variations: result.variations,
+            class_id: result.class_id
+          });
         } else {
-          console.error("No data URI found in output:", stdout);
+          console.error("No variations found in output:", stdout);
           res.status(500).json({ error: "No image generated", output: stdout });
         }
       } catch (parseError) {
         console.error("Error parsing output:", parseError);
-        res.status(500).json({ error: "Output parsing failed" });
+        res.status(500).json({ error: "Output parsing failed", output: stdout });
       }
     });
 

@@ -10,6 +10,7 @@ import {
 } from "react";
 import {
   GeneratedImage,
+  generateDog,
   generatedImagesSlice,
   localWorkspaceTransform,
   navigateHistory,
@@ -25,8 +26,7 @@ import clsx from "clsx";
 import { animated, useSpring } from "@react-spring/web";
 import { batchActions } from "redux-batched-actions";
 import { Image } from "./ImageEditor";
-import { LoadingBar } from "./LoadingBar";
-import { Tip } from "./Tooltip";
+import { Loader2 } from "lucide-react";
 
 const MAX_ZOOM_STEP = 10;
 const IS_DARWIN = /Mac|iPod|iPhone|iPad/.test(
@@ -72,8 +72,10 @@ export const Content: FC = () => {
     (state) => state.generatedImages.historyIndex
   );
   const history = useAppSelector((state) => state.generatedImages.history);
+  const workspaceTool = useAppSelector((state) => state.generatedImages.workspaceTool);
 
   const [dragging, setDragging] = useState(false);
+  const [mouseCanvasPos, setMouseCanvasPos] = useState({ x: 0, y: 0 });
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const workspaceRef = useRef<HTMLDivElement | null>(null);
 
@@ -159,6 +161,11 @@ export const Content: FC = () => {
   }, [dispatch, editorId]);
 
   const onMouseDown: MouseEventHandler = (e) => {
+    if (workspaceTool === "place-tool") {
+      dispatch(generateDog({ x: mouseCanvasPos.x - 32, y: mouseCanvasPos.y - 32 }));
+      dispatch(generatedImagesSlice.actions.setWorkspaceTool({ tool: "select-tool" }));
+      return;
+    }
     if (e.target !== e.currentTarget) return;
     setDragging(true);
     dispatch(setEditingImage(null));
@@ -171,6 +178,19 @@ export const Content: FC = () => {
   };
 
   const onMouseMove: MouseEventHandler = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const canvasX =
+      (mouseX - rect.width / 2 - localWorkspaceTransform.x) /
+      localWorkspaceTransform.scale;
+    const canvasY =
+      (mouseY - rect.height / 2 - localWorkspaceTransform.y) /
+      localWorkspaceTransform.scale;
+
+    setMouseCanvasPos({ x: canvasX, y: canvasY });
+
     if (dragging) {
       dispatch(
         transformWorkspace({
@@ -202,55 +222,15 @@ export const Content: FC = () => {
   return (
     <div
       ref={viewportRef}
-      className="relative flex-1"
+      className={clsx(
+        "relative flex-1",
+        workspaceTool === "place-tool" ? "cursor-crosshair" : "cursor-default"
+      )}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
     >
-      <div className="absolute left-4 top-3 flex items-center h-[40px] z-50">
-        <div className="flex mr-4 canvas-item bg-white rounded p-2 items-center h-full">
-          {/* <img
-            
-            className="h-full mr-4 mt-0.5 select-none"
-          /> */}
-          <div className="text-[35px] mr-3 mt-1 ml-1 -mb-[4px]">🧙‍♂️</div>
-          <div className="text-2xl font-medium mr-6 truncate w-[400px] mt-[3px]">
-            {initialText}
-          </div>
-        </div>
-        <div className="flex mr-3 canvas-item bg-white rounded p-2 items-center h-full justify-between -mb-1">
-          <div
-            onClick={() => {
-              dispatch(navigateHistory(-1));
-            }}
-            className={clsx(
-              "rounded-full w-8 h-8 flex items-center justify-center cursor-pointer mr-2",
-              historyIndex <= 0
-                ? "pointer-events-none text-gray-400"
-                : "hover:bg-gray-200 text-gray-700"
-            )}
-          >
-            <span className="material-symbols-outlined text-[22px]">
-              arrow_back
-            </span>
-          </div>
-          <div
-            onClick={() => {
-              dispatch(navigateHistory(1));
-            }}
-            className={clsx(
-              "rounded-full w-8 h-8 flex items-center justify-center cursor-pointer",
-              historyIndex >= history.length - 1
-                ? "pointer-events-none text-gray-400"
-                : "hover:bg-gray-200 text-gray-700"
-            )}
-          >
-            <span className="material-symbols-outlined text-[22px]">
-              arrow_forward
-            </span>
-          </div>
-        </div>
-      </div>
+
       <div
         ref={workspaceRef}
         id="workspace"
@@ -272,7 +252,17 @@ export const Content: FC = () => {
             <GeneratedImageItem key={image.id} image={image} />
           ));
         }, [images])}
-        <div className="rounded-full bg-black w-8 h-8 absolute left-1/2 right-1/2 -translate-x-1/2 -translate-y-1/2" />
+
+        {workspaceTool === "place-tool" && (
+          <div
+            className="absolute border-2 border-dashed border-blue-400 w-[64px] h-[64px] pointer-events-none rounded-sm"
+            style={{
+              transform: `translate(${mouseCanvasPos.x - 32}px, ${
+                mouseCanvasPos.y - 32
+              }px)`,
+            }}
+          />
+        )}
       </div>
       <PointerArrow />
     </div>
@@ -388,7 +378,7 @@ const GeneratedImageItem: FC<GeneratedImageItemProps> = ({ image }) => {
         ...style,
       }}
       className={clsx(
-        `absolute cursor- box-border flex top-0 left-0 translate-x-1/2 translate-y-1/2 transition-shadow canvas-item z-10`,
+        `absolute cursor- box-border flex top-0 left-0 translate-x-1/2 translate-y-1/2 transition-shadow canvas-item rounded-sm z-10`,
         isEditing && "z-20",
         cursor
       )}
@@ -398,9 +388,9 @@ const GeneratedImageItem: FC<GeneratedImageItemProps> = ({ image }) => {
       {image.url != null ? (
         <Image imageRef={imageRef} image={image} isEditing={isEditing} />
       ) : (
-        <div className="w-[300px] h-[300px] bg-gray-100 flex justify-center items-center flex-col gap-y-4">
-          <LoadingBar progress={100} slow={image.percentageDone === 0} />
-          <div className="text-gray-600 text-[12px] break-words px-4 flex-1 justify-center grow-0 max-w-full">
+        <div className="w-[64px] h-[64px] bg-gray-100 flex justify-center items-center flex-col gap-y-1">
+          <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+          <div className="text-gray-600 text-[6px] break-words px-1 flex-1 justify-center grow-0 max-w-full leading-tight hidden">
             {image.prompt}
           </div>
         </div>
@@ -434,7 +424,6 @@ const PointerArrow = () => {
       >
         east
       </span>
-      <Tip id="#workspace-arrow" place="left-start" content="Go to center" />
     </>
   );
 };

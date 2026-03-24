@@ -5,6 +5,7 @@ import "./index.css";
 import { Provider } from "react-redux";
 import { persistor, store } from "./state.ts";
 import { PersistGate } from "redux-persist/integration/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 if (localStorage.getItem("state-version") !== "1") {
   localStorage.removeItem("persist:root");
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <App />
+        <TooltipProvider delay={300}>
+          <App />
+        </TooltipProvider>
       </PersistGate>
     </Provider>
   </React.StrictMode>

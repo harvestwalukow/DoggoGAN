@@ -2,6 +2,9 @@
 const cache: Record<string, string> = {};
 
 export const toOptimizedImage = (url: string) => {
+  if (url.startsWith('data:image')) {
+    return url;
+  }
   if (url in cache) {
     return cache[url];
   }
