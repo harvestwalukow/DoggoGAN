@@ -217,9 +217,14 @@ app.post("/generate-dog", async (req, res) => {
   try {
     const { numImages = 1, classId } = req.body;
     
-    const scriptPath = path.resolve(process.cwd(), "../../inference.py");
-    const cwd = path.resolve(process.cwd(), "../../");
-    const pythonPath = path.resolve(cwd, "venv/Scripts/python.exe");
+    const scriptPath = path.resolve(__dirname, "../../inference.py");
+    const cwd = path.resolve(__dirname, "../../");
+    
+    // Use environment variable for Python path (defaults to venv on Windows, python3 on Linux)
+    const pythonPath = process.env.PYTHON_PATH || 
+                      (process.platform === "win32" 
+                        ? path.resolve(cwd, "venv/Scripts/python.exe") 
+                        : "python3");
 
     let command = `"${pythonPath}" "${scriptPath}" --num_images ${numImages}`;
     if (classId !== undefined && classId !== null) {
