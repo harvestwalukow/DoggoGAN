@@ -1,7 +1,6 @@
 import {
   FC,
   MouseEventHandler,
-  ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -13,7 +12,6 @@ import {
   generateDog,
   generatedImagesSlice,
   localWorkspaceTransform,
-  navigateHistory,
   onWorkspaceElement,
   setEditingImage,
   smoothTransformWorkspace,
@@ -68,10 +66,6 @@ export const Content: FC = () => {
   const activeImageId = useAppSelector(
     (state) => state.generatedImages.activeImageId
   );
-  const historyIndex = useAppSelector(
-    (state) => state.generatedImages.historyIndex
-  );
-  const history = useAppSelector((state) => state.generatedImages.history);
   const workspaceTool = useAppSelector((state) => state.generatedImages.workspaceTool);
 
   const [dragging, setDragging] = useState(false);
@@ -210,15 +204,6 @@ export const Content: FC = () => {
     dispatch(onWorkspaceElement(workspaceRef.current));
   }, [dispatch]);
 
-  const initialText = useMemo(() => {
-    if (activeImageId == null || images[activeImageId] == null) {
-      return "Select an image...";
-    }
-    return images[activeImageId].prompt.replace(
-      /(?:https?|ftp):\/\/[\n\S]+/g,
-      ""
-    );
-  }, [activeImageId, images]);
   return (
     <div
       ref={viewportRef}
@@ -240,14 +225,7 @@ export const Content: FC = () => {
         }}
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 will-change-transform"
       >
-        {/*  EHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH */}
         {useMemo(() => {
-          // const imgs: ReactNode[] = [];
-          // for (const id in images) {
-          //   if (!(id in workspaceImages)) {
-          //     imgs.push(<GeneratedImageItem key={id} image={images[id]} />);
-          //   }
-          // }
           return Object.values(images).map((image) => (
             <GeneratedImageItem key={image.id} image={image} />
           ));
@@ -264,7 +242,6 @@ export const Content: FC = () => {
           />
         )}
       </div>
-      <PointerArrow />
     </div>
   );
 };
@@ -396,34 +373,5 @@ const GeneratedImageItem: FC<GeneratedImageItemProps> = ({ image }) => {
         </div>
       )}
     </animated.div>
-  );
-};
-
-const PointerArrow = () => {
-  const dispatch = useAppDispatch();
-  const workspaceTransform = useAppSelector(
-    (state) => state.generatedImages.workspaceTransform
-  );
-  const x = workspaceTransform.x;
-  const y = workspaceTransform.y;
-  const distanceFromCenter = Math.sqrt(x * x + y * y);
-
-  if (distanceFromCenter <= 1000) return null;
-  const angleInDegrees = Math.atan2(y, x) * (180 / Math.PI);
-  return (
-    <>
-      <span
-        id="workspace-arrow"
-        style={{
-          transform: `rotate(${angleInDegrees}deg)`,
-        }}
-        className="material-symbols-outlined absolute bottom-6 right-6 font-medium cursor-pointer"
-        onClick={() => {
-          dispatch(smoothTransformWorkspace({ x: 0, y: 0 }));
-        }}
-      >
-        east
-      </span>
-    </>
   );
 };
