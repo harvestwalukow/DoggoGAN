@@ -23,7 +23,7 @@ function App() {
   const editorId = useAppSelector((state) => state.generatedImages.editorId);
   const transRef = useSpringRef();
   const [showSettings, setShowSettings] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
   const workspaceTool = useAppSelector(
     (state) => state.generatedImages.workspaceTool
   );
