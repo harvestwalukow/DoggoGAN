@@ -21,6 +21,7 @@ import { MousePointer2, Hand, Eraser, Wand2, Trash2, PanelLeft } from "lucide-re
 function App() {
   const dispatch = useAppDispatch();
   const editorId = useAppSelector((state) => state.generatedImages.editorId);
+  const scale = useAppSelector((state) => state.generatedImages.workspaceTransform.scale);
   const transRef = useSpringRef();
   const [showSettings, setShowSettings] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -55,6 +56,15 @@ function App() {
         >
           <PanelLeft className="h-5 w-5" />
         </Button>
+      </div>
+
+      {/* Zoom Percentage Indicator (Figma Style) */}
+      <div className="absolute top-4 right-4 z-[60]">
+        <div className="bg-white border border-gray-100 rounded-md shadow-sm px-2 py-1 flex items-center select-none">
+          <span className="text-[11px] font-medium text-gray-500">
+            {Math.round(scale * 100)}%
+          </span>
+        </div>
       </div>
 
       {/* Minimalist Sidebar with YouTube Embed */}
