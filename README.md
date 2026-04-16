@@ -17,3 +17,9 @@ image-model/
 ├── train_code.py 
 └── infinite-canvas-image-generation/  # web-based canvas application
 ```
+
+## TODO
+
+- [ ] faster inference
+- [ ] generate specified dog breed
+
