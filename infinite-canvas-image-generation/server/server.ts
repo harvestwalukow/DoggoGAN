@@ -9,6 +9,7 @@ import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { exec } from "child_process";
+import fs from "fs";
 
 if (!globalThis.fetch) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -217,8 +218,14 @@ app.post("/generate-dog", async (req, res) => {
   try {
     const { numImages = 1, classId } = req.body;
     
-    const scriptPath = path.resolve(__dirname, "../../inference.py");
-    const cwd = path.resolve(__dirname, "../../");
+    let scriptPath = path.resolve(__dirname, "../../inference.py");
+    let cwd = path.resolve(__dirname, "../../");
+
+    // If not found at 2 levels (Prod/Docker structure), try 3 levels (Local Dev structure)
+    if (!fs.existsSync(scriptPath)) {
+      scriptPath = path.resolve(__dirname, "../../../inference.py");
+      cwd = path.resolve(__dirname, "../../../");
+    }
     
     // Use environment variable for Python path (defaults to venv on Windows, python3 on Linux)
     const pythonPath = process.env.PYTHON_PATH || 

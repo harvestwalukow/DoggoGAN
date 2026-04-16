@@ -445,8 +445,8 @@ export const generateImageVariations = (
       parent: null,
       children: [],
       transform: findEmptyArea(
-        -workspaceTransform.x,
-        -workspaceTransform.y,
+        -workspaceTransform.x / workspaceTransform.scale,
+        -workspaceTransform.y / workspaceTransform.scale,
         Object.values(getState().generatedImages.images)
       ),
     };
@@ -764,9 +764,9 @@ export const generateDog = (pos?: { x: number; y: number }): AppThunk => {
       parent: null,
       prompt: "AI Image",
       children: [],
-      transform: findEmptyArea(
-        -workspaceTransform.x * (1 / workspaceTransform.scale),
-        -workspaceTransform.y * (1 / workspaceTransform.scale),
+      transform: pos ?? findEmptyArea(
+        -workspaceTransform.x / workspaceTransform.scale,
+        -workspaceTransform.y / workspaceTransform.scale,
         Object.values(images)
       ),
     };
@@ -833,8 +833,8 @@ export const addImageToWorkspace = (
       prompt: originalImage.prompt,
       children: [],
       transform: findEmptyArea(
-        -workspaceTransform.x * (1 / workspaceTransform.scale),
-        -workspaceTransform.y * (1 / workspaceTransform.scale),
+        -workspaceTransform.x / workspaceTransform.scale,
+        -workspaceTransform.y / workspaceTransform.scale,
         Object.values(images)
       ),
     };
