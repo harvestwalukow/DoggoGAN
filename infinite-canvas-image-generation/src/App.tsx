@@ -98,7 +98,7 @@ function App() {
               <Card className="canvas-item flex flex-row p-1.5 gap-1 pointer-events-auto items-center shadow-md border-gray-100">
                 
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Button
                       variant={workspaceTool === "select-tool" ? "secondary" : "ghost"}
                       className="h-10 w-10 font-bold"
@@ -111,7 +111,7 @@ function App() {
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Button
                       variant={workspaceTool === "grab-tool" ? "secondary" : "ghost"}
                       className="h-10 w-10"
@@ -124,7 +124,7 @@ function App() {
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Button
                       variant={workspaceTool === "delete-tool" ? "secondary" : "ghost"}
                       className="h-10 w-10"
@@ -139,7 +139,7 @@ function App() {
                 <Separator orientation="vertical" className="mx-1 h-8 bg-gray-100" />
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Button
                       variant={workspaceTool === "place-tool" ? "secondary" : "ghost"}
                       className="h-10 w-10 text-gray-500 hover:text-gray-900 group"
@@ -154,7 +154,7 @@ function App() {
                 <Separator orientation="vertical" className="mx-1 h-8 bg-gray-100" />
 
                 <Tooltip>
-                  <TooltipTrigger asChild>
+                  <TooltipTrigger>
                     <Button
                       variant="ghost"
                       className="h-10 w-10 text-red-500 hover:bg-red-50 hover:text-red-600"
