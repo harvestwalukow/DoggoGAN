@@ -47,7 +47,7 @@ function App() {
   return (
     <div className="flex-1 relative flex overflow-hidden bg-white">
       {/* Minimalist Sidebar Toggle */}
-      <div className="absolute top-4 left-4 z-[60]">
+      <div className="absolute safe-top safe-left z-[60]">
         <Button
           variant="ghost"
           size="icon"
@@ -59,7 +59,7 @@ function App() {
       </div>
 
       {/* Zoom Percentage Indicator (Figma Style) */}
-      <div className="absolute top-4 right-4 z-[60]">
+      <div className="absolute safe-top safe-right z-[60]">
         <div className="bg-white border border-gray-100 rounded-md shadow-sm px-2 py-1 flex items-center select-none">
           <span className="text-[11px] font-medium text-gray-500">
             {Math.round(scale * 100)}%
@@ -74,7 +74,15 @@ function App() {
           !showSidebar && "-translate-x-full"
         )}
       >
-        <div className="flex-1 overflow-y-auto overflow-x-hidden pt-12">
+        <div 
+          className="flex-1 overflow-y-auto overflow-x-hidden"
+          style={{ 
+            paddingTop: 'calc(3rem + env(safe-area-inset-top))',
+            paddingBottom: 'env(safe-area-inset-bottom)',
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)'
+          }}
+        >
           <div className="p-4">
             <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shadow-sm">
               <div className="absolute inset-0 w-[150%] h-[150%] origin-top-left scale-[0.6666]">
@@ -104,7 +112,7 @@ function App() {
       {transitionToolbar(
         (style, item) =>
           item && (
-            <animated.div style={style} className="absolute bottom-8 w-full flex justify-center pointer-events-none z-50">
+            <animated.div style={style} className="absolute safe-bottom w-full flex justify-center pointer-events-none z-50">
               <Card className="canvas-item flex flex-row p-1.5 gap-1 pointer-events-auto items-center shadow-md border-gray-100">
                 
                 <Tooltip>
