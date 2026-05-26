@@ -16,21 +16,34 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy frontend (Vite) dependencies and install
+COPY infinite-canvas-image-generation/package*.json /app/infinite-canvas-image-generation/
+WORKDIR /app/infinite-canvas-image-generation
+RUN npm install
+
 # Copy backend (Node) dependencies and install
-COPY infinite-canvas-image-generation/server/package*.json ./server/
+COPY infinite-canvas-image-generation/server/package*.json /app/server/
 WORKDIR /app/server
 RUN npm install
 
 # Copy all project files
 WORKDIR /app
-COPY dog_gan_64.pth .
-COPY inference.py .
-COPY train_code.py .
-COPY infinite-canvas-image-generation/server ./server
+COPY dog_gan_64.pth /app/
+COPY inference.py /app/
+COPY train_code.py /app/
+COPY infinite-canvas-image-generation /app/infinite-canvas-image-generation
+COPY infinite-canvas-image-generation/server /app/server
+
+# Build the frontend
+WORKDIR /app/infinite-canvas-image-generation
+RUN npm run build
 
 # Build the TypeScript server
 WORKDIR /app/server
 RUN npm run build
+
+# Copy frontend built files to the server's static directory
+RUN cp -r /app/infinite-canvas-image-generation/dist/* /app/server/dist/
 
 # Expose the server port
 EXPOSE 3000
@@ -41,3 +54,4 @@ ENV PYTHON_PATH=python3
 
 # Run the server
 CMD ["node", "dist/server.js"]
+
